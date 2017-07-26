@@ -1,11 +1,10 @@
 package nested
 
-
 // -- create table
 // CREATE TABLE IF NOT EXISTS `nested`(
-// `id` INT NOT NULL COMMENT '  ID',
+// `id` BIGINT NOT NULL COMMENT '  ID',
 // `node` VARCHAR(64) CHARACTER SET 'utf8' NOT NULL COMMENT '    ',
-// `pid` INT NOT NULL COMMENT '   ID',
+// `pid` BIGINT NOT NULL COMMENT '   ID',
 // `depth` INT NOT NULL COMMENT '  Level',
 // `lft` INT NOT NULL COMMENT '  ',
 // `rgt` INT NOT NULL COMMENT '  ',
