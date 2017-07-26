@@ -65,6 +65,11 @@ func atoi(s string) int32 {
 	return int32(i)
 }
 
-func itoa(i int32)string{
+func itoa(i int32) string {
 	return strconv.FormatInt(int64(i), 10)
+}
+
+func atoi64(s string) int64 {
+	i, _ := strconv.ParseInt(s, 10, 64)
+	return i
 }

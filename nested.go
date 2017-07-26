@@ -20,9 +20,9 @@ const (
 
 // Node detail with path from root to node
 type Node struct {
-	ID          int32
+	ID          int64
 	Node        string
-	ParentID    int32
+	ParentID    int64
 	Depth       int32
 	Path        []int32
 	PathName    []string
@@ -56,9 +56,9 @@ func GetNodeDetail(id int32) (*Node, error) {
 
 	r := rows[len(rows)-1]
 	node := &Node{
-		ID:          atoi(r["id"]),
+		ID:          atoi64(r["id"]),
 		Node:        r["node"],
-		ParentID:    atoi(r["pid"]),
+		ParentID:    atoi64(r["pid"]),
 		Depth:       atoi(r["depth"]),
 		Path:        path,
 		PathName:    pathName,
@@ -85,9 +85,9 @@ func GetChildren(id int32) ([]Node, error) {
 	children := make([]Node, 0, len(rows))
 	for _, r := range rows {
 		children = append(children, Node{
-			ID:          atoi(r["id"]),
+			ID:          atoi64(r["id"]),
 			Node:        r["node"],
-			ParentID:    atoi(r["pid"]),
+			ParentID:    atoi64(r["pid"]),
 			Depth:       atoi(r["depth"]),
 			NumChildren: (atoi(r["rgt"]) - atoi(r["lft"]) - 1) / 2,
 		})
@@ -113,9 +113,9 @@ func GetDescendants(id int32) ([]Node, error) {
 	descendants := make([]Node, 0, len(rows))
 	for _, r := range rows {
 		descendants = append(descendants, Node{
-			ID:          atoi(r["id"]),
+			ID:          atoi64(r["id"]),
 			Node:        r["node"],
-			ParentID:    atoi(r["pid"]),
+			ParentID:    atoi64(r["pid"]),
 			Depth:       atoi(r["depth"]),
 			NumChildren: (atoi(r["rgt"]) - atoi(r["lft"]) - 1) / 2,
 		})
