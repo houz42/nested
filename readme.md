@@ -55,14 +55,14 @@ Test data used in `nested_test.go` are collected from previous [wikipedia articl
 
 Traversal and number nodes as:
 
-![traversing](https://en.wikipedia.org/wiki/Nested_set_model#/media/File:Clothing-hierarchy-traversal-2.svg)
+![traversing](https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Clothing-hierarchy-traversal-2.svg/523px-Clothing-hierarchy-traversal-2.svg.png)
 
 ## Demo Chinese division data representation
 
 Store Chinese division data with nested sets:
 
 1. build a division tree from raw data,
-2. assign left and right number for divisions with preorder tree traversal,
+2. assign left and right number for divisions by preorder tree traversal,
 3. generate sql inserting queries
 
 Data collected from [中国行政区划数据](https://github.com/modood/Administrative-divisions-of-China). Initial inserting SQL in `division.sql` are generated with `build.go`:
