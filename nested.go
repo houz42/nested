@@ -1,10 +1,12 @@
-package nested
+package main
 
 import (
 	"bytes"
 	"errors"
 	"log"
 )
+
+//go:generate go run build/build.go
 
 const (
 	tblName           = "nested"

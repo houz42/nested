@@ -1,4 +1,4 @@
-package nested
+package main
 
 import (
 	"log"

@@ -7,4 +7,8 @@
 
 ## Demo area division data representation
 
+```sh
+$ go generate   # generates data inserting sql 
+```
+
 Data collected from [中国行政区划数据](https://github.com/modood/Administrative-divisions-of-China). Insert SQL in `address.sql` are generated with `build.go`.
