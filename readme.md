@@ -18,6 +18,6 @@ $ cd division && go run build.go   # generates data inserting sql
 ## Use as a dependence
 
 1. create new table as in `createtable.sql` with your table name;
-2. call `SetTableName()` in your `init()`;
-3. initialize table as in `division/build.go`, or
-4. call `Add...()` continually as in `TestInserting()`
+2. initialize table as in `division/build.go`, or
+3. call `Add...()` continually as in `TestInserting()`;
+4. call `SetTableName()` in your `init()`;
