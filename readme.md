@@ -14,14 +14,16 @@ Numbers could be assigned according to a preorder tree traversal, which visits e
 
 - Then querying all descendants of a node could be efficiency as:
 ```sql
-SELECT child.id, child.node, child.lft, child.rgt FROM `nested` parent, `nested` child
+SELECT child.id, child.node, child.lft, child.rgt
+    FROM `nested` parent, `nested` child
     WHERE child.lft BETWEEN parent.left AND parent.right 
     AND parent.id=@node_id
 ```
 
 - And querying the path from root to any node could be:
 ```sql
-SELECT parent.id, parent.node, parent.lft, parent.rgt FROM `nested` parent, `nested` child
+SELECT parent.id, parent.node, parent.lft, parent.rgt
+    FROM `nested` parent, `nested` child
     WHERE child.lft BETWEEN parent.lft AND parent.rgt
     AND child.id=@node_id
     ORDER BY parent.lft
@@ -29,7 +31,8 @@ SELECT parent.id, parent.node, parent.lft, parent.rgt FROM `nested` parent, `nes
 
 - To query immediate children of a node efficiently, another column `depth` is used to record depth of the node, and the querying could be:
 ```sql
-SELECT child.id, child.node, child.lft, child.rgt FROM `nested` parent, `nested` child
+SELECT child.id, child.node, child.lft, child.rgt
+    FROM `nested` parent, `nested` child
     WHERE child.lft BETWEEN parent.lft AND parent.rgt
     AND child.depth=parent.depth+1
 ```
@@ -71,7 +74,7 @@ Data collected from [中国行政区划数据](https://github.com/modood/Adminis
 $ cd division && go run build.go   # generates data inserting sql 
 ```
 
-## Use as a dependence
+## Use as dependency
 
 1. create new table as in `createtable.sql` with your table name;
 2. initialize table as in `division/build.go`, or
