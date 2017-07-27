@@ -24,13 +24,13 @@ type Node struct {
 	Node        string
 	ParentID    int64
 	Depth       int32
-	Path        []int32
+	Path        []int64
 	PathName    []string
 	NumChildren int32
 }
 
 // GetNodeDetail with path from root
-func GetNodeDetail(id int32) (*Node, error) {
+func GetNodeDetail(id int64) (*Node, error) {
 	log.Println("GetNodeDetail for: ", id)
 
 	var sql bytes.Buffer
@@ -47,10 +47,10 @@ func GetNodeDetail(id int32) (*Node, error) {
 		return nil, nil
 	}
 
-	path := make([]int32, 0, len(rows))
+	path := make([]int64, 0, len(rows))
 	pathName := make([]string, 0, len(rows))
 	for _, r := range rows {
-		path = append(path, atoi(r["id"]))
+		path = append(path, atoi64(r["id"]))
 		pathName = append(pathName, r["node"])
 	}
 
@@ -69,7 +69,7 @@ func GetNodeDetail(id int32) (*Node, error) {
 }
 
 // GetChildren returns all immediate children of node
-func GetChildren(id int32) ([]Node, error) {
+func GetChildren(id int64) ([]Node, error) {
 	log.Println("GetChildren for: ", id)
 
 	var sql bytes.Buffer
@@ -97,7 +97,7 @@ func GetChildren(id int32) ([]Node, error) {
 }
 
 // GetDescendants returns sub tree of node
-func GetDescendants(id int32) ([]Node, error) {
+func GetDescendants(id int64) ([]Node, error) {
 	log.Println("GetDescendants for: ", id)
 
 	var sql bytes.Buffer
@@ -128,7 +128,7 @@ func GetDescendants(id int32) ([]Node, error) {
 
 // AddRootNode adds a new root. There could be more than one root node, and the new root will be the left most one,
 // or AddNodeBySibling should be used to insert a new root after another one.
-func AddRootNode(id int32, name string) error {
+func AddRootNode(id int64, name string) error {
 	log.Println("AddRootNode for id: ", id, ", name: ", name)
 
 	// move all other nodes to right, if exits
@@ -160,7 +160,7 @@ func AddRootNode(id int32, name string) error {
 }
 
 // AddNodeByParent adds a new node with certain parent, new node will be the last child of the parent.
-func AddNodeByParent(id int32, name string, parentID int32) error {
+func AddNodeByParent(id int64, name string, parentID int64) error {
 	log.Println("AddNodeByParent for id: ", id, ", name: ", name, " of parent: ", parentID)
 
 	// query parent
@@ -207,7 +207,7 @@ func AddNodeByParent(id int32, name string, parentID int32) error {
 }
 
 // AddNodeBySibling add a new node right after sibling
-func AddNodeBySibling(id int32, name string, siblingID int32) error {
+func AddNodeBySibling(id int64, name string, siblingID int64) error {
 	log.Println("AddNodeBySibling for id: ", id, ", name: ", name, ", with sibling: ", siblingID)
 
 	var sql bytes.Buffer
