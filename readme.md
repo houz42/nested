@@ -29,12 +29,13 @@ SELECT parent.id, parent.node, parent.lft, parent.rgt
     ORDER BY parent.lft
 ```
 
-- To query immediate children of a node efficiently, another column `depth` is used to record depth of the node, and the querying could be:
+- Another column `depth` is used to record depth of the node, to query immediate children of a node efficiently, and the querying could be:
 ```sql
 SELECT child.id, child.node, child.lft, child.rgt
     FROM `nested` parent, `nested` child
     WHERE child.lft BETWEEN parent.lft AND parent.rgt
     AND child.depth=parent.depth+1
+    AND parent.id=@node_id
 ```
 
 The nested model is also suitable for trees with more than one root, forests.
