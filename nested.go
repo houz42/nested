@@ -11,9 +11,10 @@ const (
 	selectSQL         = "SELECT id, node, pid, depth, lft, rgt FROM " + tblName + " WHERE "
 	selectChildrenSQL = "SELECT child.id, child.node, child.pid, child.depth, child.lft, child.rgt FROM " + tblName + " AS child, " + tblName + " AS parent WHERE "
 	selectParentsSQL  = "SELECT parent.id, parent.node, parent.pid, parent.depth, parent.lft, parent.rgt FROM " + tblName + " AS child, " + tblName + " AS parent WHERE "
-	moveByParentSQL   = "UPDATE " + tblName + " SET lft=CASE WHEN lft>=? THEN lft+2 ELSE lft END, rgt=CASE WHEN rgt>=? THEN rgt+2 ELSE rgt END"
-	moveBySiblingSQL  = "UPDATE " + tblName + " SET lft=CASE WHEN lft>? THEN lft+2 ELSE lft END, rgt=CASE WHEN rgt>? THEN rgt+2 ELSE rgt END"
+	moveOnAddSQL      = "UPDATE " + tblName + " SET lft=CASE WHEN lft>? THEN lft+2 ELSE lft END, rgt=CASE WHEN rgt>? THEN rgt+2 ELSE rgt END"
 	moveOnDeleteSQL   = "UPDATE " + tblName + " SET lft=CASE WHEN lft>? THEN lft-? ELSE lft END, rgt=CASE WHEN rgt>? THEN rgt-? ELSE rgt END"
+	moveOnLevelUpSQL  = "UPDATE " + tblName + " SET lft=lft-1, rgt=rgt-1, depth=depth-1 WHERE lft BETWEEN ? AND ?"
+	updatePIDSQL      = "UPDATE " + tblName + " AS child, " + tblName + " AS parent SET child.pid=parent.pid WHERE child.pid=parent.id AND child.lft BETWEEN ? AND ?"
 	insertSQL         = "INSERT INTO " + tblName + "(id, node, pid, depth, lft, rgt) VALUES(?,?,?,?,?,?)"
 	deleteSQL         = "DELETE FROM " + tblName + " WHERE "
 )
@@ -133,7 +134,7 @@ func AddRootNode(id int64, name string) error {
 
 	// move all other nodes to right, if exits
 	var sql bytes.Buffer
-	sql.WriteString(moveByParentSQL)
+	sql.WriteString(moveOnAddSQL)
 	log.Println("move nodes sql: ", sql.String(), ", args: ", 0, 0)
 	_, err := db.Exec(sql.String(), 0, 0)
 	if err != nil {
@@ -180,11 +181,11 @@ func AddNodeByParent(id int64, name string, parentID int64) error {
 	parentDepth := atoi(rows[0]["depth"])
 	sql.Reset()
 
-	// moves nodes on the right
-	sql.WriteString(moveByParentSQL)
-	log.Println("move right sql: ", sql.String(), " on right of: ", parentRight)
+	// moves nodes on the right to right by 2,
+	sql.WriteString(moveOnAddSQL)
+	log.Println("move right sql: ", sql.String(), " on right of: ", parentRight-1)
 
-	_, err = db.Exec(sql.String(), parentRight, parentRight)
+	_, err = db.Exec(sql.String(), parentRight, parentRight-1) //  move right index of parent to right by 2
 	if err != nil {
 		log.Panicln("db.Exec error: ", err)
 	}
@@ -229,8 +230,8 @@ func AddNodeBySibling(id int64, name string, siblingID int64) error {
 	parentID := atoi(rows[0]["pid"])
 	sql.Reset()
 
-	// moves nodes on the right
-	sql.WriteString(moveBySiblingSQL)
+	// moves nodes on the right to right by 2
+	sql.WriteString(moveOnAddSQL)
 	log.Println("move right sql: ", sql.String(), " on right of: ", siblingRight)
 
 	_, err = db.Exec(sql.String(), siblingRight, siblingRight)
@@ -255,11 +256,11 @@ func AddNodeBySibling(id int64, name string, siblingID int64) error {
 	return nil
 }
 
-// RemoveNodes removes node and all its descendants
-func RemoveNodes(id string) error {
-	log.Println("RemoveNode: ", id)
+// RemoveNodeAndDescendants removes node and all its descendants -- it removes the whole subtree.
+func RemoveNodeAndDescendants(id int64) error {
+	log.Println("RemoveNodeAndDescendants: ", id)
 
-	// query node
+	// query deleting node
 	var sql bytes.Buffer
 	sql.WriteString(selectSQL)
 	sql.WriteString("id=?")
@@ -278,7 +279,7 @@ func RemoveNodes(id string) error {
 	width := right - left + 1
 	sql.Reset()
 
-	// delete descendants
+	// delete node and all its descendants
 	sql.WriteString(deleteSQL)
 	sql.WriteString("lft BETWEEN ? AND ?")
 	log.Println("delete sql: ", sql.String(), ", args: ", left, right)
@@ -293,7 +294,7 @@ func RemoveNodes(id string) error {
 	}
 	sql.Reset()
 
-	// move keys
+	// move all node on the right to left
 	sql.WriteString(moveOnDeleteSQL)
 	log.Println("move keys on delete sql: ", sql.String(), " args: ", right, width, right, width)
 
@@ -301,5 +302,76 @@ func RemoveNodes(id string) error {
 	if err != nil {
 		log.Panic("db.Exec error: ", err)
 	}
+	return nil
+}
+
+// RemoveOneNode removes one node and move all its descentants 1 level up -- it removes the certain node from the tree only.
+func RemoveOneNode(id int64) error {
+	log.Println("RemoveOneNode for: ", id)
+
+	// query deleting node
+	var sql bytes.Buffer
+	sql.WriteString(selectSQL)
+	sql.WriteString("id=?")
+	log.Println("select sql: ", sql.String(), " id: ", id)
+
+	rows, err := query(sql.String(), id)
+	if err != nil {
+		log.Panicln("db.query error: ", err)
+	}
+	if len(rows) < 1 {
+		return errors.New("query got none")
+	}
+	sql.Reset()
+
+	left := atoi(rows[0]["lft"])
+	right := atoi(rows[0]["rgt"])
+
+	// update pid of its descendants
+	sql.WriteString(updatePIDSQL)
+	log.Println("update pid sql: ", sql.String(), " args: ", left, right)
+
+	_, err = db.Exec(sql.String(), left, right)
+	if err != nil {
+		log.Fatal("db.exec error: ", err)
+	}
+	sql.Reset()
+
+	// delete node
+	sql.WriteString(deleteSQL)
+	sql.WriteString("id=?")
+	log.Println("delete sql: ", sql.String(), " arg: ", id)
+
+	r, err := db.Exec(sql.String(), id)
+	if err != nil {
+		log.Fatal("db.Exec error: ", err)
+	}
+	affected, _ := r.RowsAffected()
+	if affected != 1 {
+		log.Fatal("delete node affected rows: ", affected)
+	}
+	sql.Reset()
+
+	// move all its descentants left and up 1 step
+	sql.WriteString(moveOnLevelUpSQL)
+	log.Print("move descendants sql: ", sql.String(), " args: ", left, right)
+
+	_, err = db.Exec(sql.String(), left, right) // could affect none
+	if err != nil {
+		log.Fatal("db.Exec error: ", err)
+	}
+	sql.Reset()
+
+	// move all other nodes on the right to left by 2 steps
+	sql.WriteString(moveOnDeleteSQL)
+	log.Print("move right nodes sql: ", sql.String(), " args: ", right, 2, right, 2)
+
+	_, err = db.Exec(sql.String(), right, 2, right, 2) // could affect none
+	if err != nil {
+		log.Fatal("db.Exec error: ", err)
+	}
+
+	log.Printf("delete node %d done", id)
+
 	return nil
 }

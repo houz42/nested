@@ -87,3 +87,17 @@ func TestDescendants(t *testing.T) {
 	}
 	log.Print(nodes)
 }
+
+func TestRemoveOneNode(t *testing.T) {
+	err := RemoveOneNode(4)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRemoveSunTree(t *testing.T) {
+	err := RemoveNodeAndDescendants(2)
+	if err != nil {
+		t.Error(err)
+	}
+}
