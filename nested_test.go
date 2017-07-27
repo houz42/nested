@@ -1,71 +1,82 @@
-package main
+package nested
 
 import (
+	"database/sql"
 	"log"
 	"testing"
 )
 
+var db *sql.DB
+
+func init() {
+	var err error
+	db, err = sql.Open("driverName", "dataSourceName")
+	if err != nil {
+		log.Panic(err)
+	}
+}
+
 func TestAddRoot(t *testing.T) {
-	err := AddRootNode(1, "Clothing")
+	err := AddRootNode(db, 1, "Clothing")
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestInserting(t *testing.T) {
-	err := AddRootNode(1, "Clothing")
+	err := AddRootNode(db, 1, "Clothing")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = AddNodeByParent(2, "Men' s", 1)
+	err = AddNodeByParent(db, 2, "Men' s", 1)
 	if err != nil {
 		t.Error(err)
 	}
-	err = AddNodeBySibling(3, "Women' s", 2)
+	err = AddNodeBySibling(db, 3, "Women' s", 2)
 	if err != nil {
 		t.Error(err)
 	}
-	err = AddNodeByParent(4, "Suits", 2)
+	err = AddNodeByParent(db, 4, "Suits", 2)
 	if err != nil {
 		t.Error(err)
 	}
-	err = AddNodeByParent(5, "Slacks", 4)
+	err = AddNodeByParent(db, 5, "Slacks", 4)
 	if err != nil {
 		t.Error(err)
 	}
-	err = AddNodeBySibling(6, "Jackets", 5)
+	err = AddNodeBySibling(db, 6, "Jackets", 5)
 	if err != nil {
 		t.Error(err)
 	}
-	err = AddNodeByParent(7, "Dresses", 3)
+	err = AddNodeByParent(db, 7, "Dresses", 3)
 	if err != nil {
 		t.Error(err)
 	}
-	err = AddNodeByParent(8, "Evening Gowns", 7)
+	err = AddNodeByParent(db, 8, "Evening Gowns", 7)
 	if err != nil {
 		t.Error(err)
 	}
-	err = AddNodeBySibling(9, "Sun Dresses", 8)
+	err = AddNodeBySibling(db, 9, "Sun Dresses", 8)
 	if err != nil {
 		t.Error(err)
 	}
-	err = AddNodeBySibling(10, "Skirts", 7)
+	err = AddNodeBySibling(db, 10, "Skirts", 7)
 	if err != nil {
 		t.Error(err)
 	}
-	err = AddNodeBySibling(11, "Blouses", 10)
+	err = AddNodeBySibling(db, 11, "Blouses", 10)
 	if err != nil {
 		t.Error(err)
 	}
-	err = AddNodeBySibling(12, "Shoes", 1)
+	err = AddNodeBySibling(db, 12, "Shoes", 1)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestQueryDetail(t *testing.T) {
-	node, err := GetNodeDetail(5)
+	node, err := GetNodeDetail(db, 5)
 	if err != nil {
 		t.Error(err)
 	}
@@ -73,7 +84,7 @@ func TestQueryDetail(t *testing.T) {
 }
 
 func TestChildren(t *testing.T) {
-	nodes, err := GetChildren(3)
+	nodes, err := GetChildren(db, 3)
 	if err != nil {
 		t.Error(err)
 	}
@@ -81,7 +92,7 @@ func TestChildren(t *testing.T) {
 }
 
 func TestDescendants(t *testing.T) {
-	nodes, err := GetDescendants(3)
+	nodes, err := GetDescendants(db, 3)
 	if err != nil {
 		t.Error(err)
 	}
@@ -89,14 +100,14 @@ func TestDescendants(t *testing.T) {
 }
 
 func TestRemoveOneNode(t *testing.T) {
-	err := RemoveOneNode(4)
+	err := RemoveOneNode(db, 4)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestRemoveSunTree(t *testing.T) {
-	err := RemoveNodeAndDescendants(2)
+	err := RemoveNodeAndDescendants(db, 2)
 	if err != nil {
 		t.Error(err)
 	}

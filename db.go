@@ -1,30 +1,17 @@
-package main
+package nested
 
 import (
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"strconv"
 )
 
-const (
-	driverName     = "mysql"
-	dataSourceName = "root:root@tcp(10.24.248.100:3307)/froad_xmall_test?charset=utf8"
-	// maxOpenConns   int
-)
-
-var db *sql.DB
-
-func init() {
-	var err error
-	db, err = sql.Open(driverName, dataSourceName)
-	if err != nil {
-		log.Panicln("sql.Open error: ", err)
-	}
-	db.Ping()
+// SetTableName for query strings
+func SetTableName(name string) {
+	tblName = name
 }
 
-func query(sql string, args ...interface{}) (records []map[string]string, err error) {
+func query(db *sql.DB, sql string, args ...interface{}) (records []map[string]string, err error) {
 	rows, err := db.Query(sql, args...)
 	if err != nil {
 		log.Println("Query failed, sql:", sql, " error:", err)
