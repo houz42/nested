@@ -16,7 +16,7 @@ Numbers could be assigned according to a preorder tree traversal, which visits e
 ```sql
 SELECT child.id, child.node, child.lft, child.rgt
     FROM `nested` parent, `nested` child
-    WHERE child.lft BETWEEN parent.left AND parent.right 
+    WHERE child.lft BETWEEN parent.lft AND parent.rgt
     AND parent.id=@node_id
 ```
 
