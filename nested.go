@@ -112,7 +112,28 @@ func GetDescendants(db *sql.DB, id int64) ([]Node, error) {
 	return descendants, nil
 }
 
-// func GetNodesByDepth(depth int32)([]Node, error)
+// GetNodesByDepth returns all nodes of certain depth
+func GetNodesByDepth(db *sql.DB, depth int32) ([]Node, error) {
+	sql := bytes.NewBufferString(selectSQL)
+	sql.WriteString("depth=?")
+
+	rows, err := query(db, sql.String(), depth)
+	if err != nil {
+		return nil, err
+	}
+
+	nodes := make([]Node, 0, len(rows))
+	for _, r := range rows {
+		nodes = append(nodes, Node{
+			ID:          atoi64(r["id"]),
+			Node:        r["node"],
+			ParentID:    atoi64(r["pid"]),
+			Depth:       atoi(r["depth"]),
+			NumChildren: (atoi(r["rgt"]) - atoi(r["lft"]) - 1) / 2,
+		})
+	}
+	return nodes, nil
+}
 
 // AddRootNode adds a new root. There could be more than one root node, and the new root will be the left most one,
 // or AddNodeBySibling should be used to insert a new root after another one.
