@@ -61,7 +61,9 @@ Traversal and number nodes as:
 
 ![traversing](https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Clothing-hierarchy-traversal-2.svg/523px-Clothing-hierarchy-traversal-2.svg.png)
 
-## Demo Chinese division data representation
+## Demo 
+
+### Chinese division data
 
 Store Chinese division data with nested sets:
 
@@ -74,6 +76,13 @@ Data collected from [中国行政区划数据](https://github.com/modood/Adminis
 ```sh
 $ cd division && go run build.go   # generates data inserting sql 
 ```
+
+### T** product categories data
+
+Store product category info and structure with nested sets:
+
+1. run `spider/spider.py` to query data from t**,
+2. build sql inserting data `data/categoryInfo.sql` and `data/categoryTree.sql` as in `build_test.go`
 
 ## Use as dependency
 
